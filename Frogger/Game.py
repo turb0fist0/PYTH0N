@@ -12,6 +12,13 @@ def run():
     spawnCars()
     canvas.mainloop()
     
+def reset():
+    x = TILESIZE * 4 - (frog.size/2)
+    y = TILESIZE * 8 - (TILESIZE/2) - (frog.size/2)
+    cx = canvas.coords(frog.obj)[0]
+    cy = canvas.coords(frog.obj)[1]
+    canvas.move(frog.obj, x - cx, y - cy)
+    
 def up(event):
     frog.up(canvas)
 
@@ -33,24 +40,36 @@ def loop():
         master.event_generate("<<Right>>")
     if GPIO.input(16) == GPIO.HIGH:
         master.event_generate("<<Down>>")
-    for i in range(len(cars)):
-        cars[i].update(canvas)
-    canvas.after(17, loop)
+    for i in range(len(leftCars)):
+        leftCars[i].update(canvas)
+    for i in range(len(rightCars)):
+        rightCars[i].update(canvas)
+    canvas.after(33, loop)
 
 def spawnCars():
     num = randint(1,100)
     if(num <= 35):
-        cars.append(Car(canvas, True, TILESIZE))
-    print(len(cars))
+        rightCars.append(Car(canvas, True, TILESIZE))
+    elif(num >= 65):
+        leftCars.append(Car(canvas, False, TILESIZE))
     k = 0
-    while k < len(cars):
-        print(cars[k])
-        if cars[k].x > TILESIZE * 8:
-            cars.remove(cars[k])
+    while k < len(rightCars):
+        if rightCars[k].x > TILESIZE * 8:
+            rightCars.remove(rightCars[k])
         else:
+            if rightCars[k].collision(canvas,frog):
+                reset()
             k += 1
+    l = 0
+    while l < len(leftCars):
+        if leftCars[l].x < 0:
+            leftCars.remove(leftCars[l])
+        else:
+            if leftCars[l].collision(canvas,frog):
+                reset()
+            l += 1
     
-    canvas.after(400, spawnCars)
+    canvas.after(500, spawnCars)
     
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(21,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
@@ -83,8 +102,11 @@ for i in range(8):
     canvas.itemconfig(tiles[i][3].tile, fill="#4a4d4b", outline="#4a4d4b")
     canvas.itemconfig(tiles[i][5].tile, fill="#4a4d4b", outline="#4a4d4b")
 
-cars = []
-cars.append(Car(canvas, True, TILESIZE))
+rightCars = []
+leftCars = []
+
+leftCars.append(Car(canvas, False, TILESIZE))
+rightCars.append(Car(canvas, True, TILESIZE))
     
 frog = Frog(TILESIZE, canvas)
 

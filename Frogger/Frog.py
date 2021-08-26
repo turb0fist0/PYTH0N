@@ -2,7 +2,7 @@ class Frog:
     def __init__(self, size, canvas):
         self.screen = size*8
         self.size = size/2
-        self.speed = 5
+        self.speed = 10
         x = size * 4 - (self.size/2)
         y = size * 7.5 - (self.size/2)
         self.obj = canvas.create_rectangle(x, y, x+self.size, y+self.size, fill = "#38d161")
